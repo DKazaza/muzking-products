@@ -1,6 +1,7 @@
 package com.example.muzkingproducts;
 
 import com.example.muzkingproducts.DAO.ProductSimpleDAO;
+import com.example.muzkingproducts.Exceptions.ProductDAOException;
 import com.example.muzkingproducts.Exceptions.ProductManagerException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,10 +11,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.layout.AnchorPane;
-
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+
 
 public class Controller {
     ObservableList<Product> products = FXCollections.observableArrayList();
@@ -45,16 +45,16 @@ public class Controller {
     @FXML
     private Button delButton;
     private final ProductManager productManager = new ProductManager();
+    private Product buffer = new Product();
 
 
     @FXML
     private void initialize() throws ProductManagerException {
         tableView.setEditable(true);
-
+        tableView.setItems(products);
 
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         idColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-
 
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -124,8 +124,7 @@ public class Controller {
                     }
                 }
         );
-        tableView.setItems(products);
-
+        initData();
         addButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
                 if(!addName.getText().equals("")&&
@@ -133,31 +132,27 @@ public class Controller {
                         !addBuy.getText().equals("")&&
                         !addPrice.getText().equals("")
                 ) {
-                products.add(new Product(
-                        Long.toString(parser()),
-                        addName.getText(),
-                        addCount.getText(),
-                        addBuy.getText(),
-                        addPrice.getText()
-                ));
                     try {
-                        productManager.addProduct(new Product(
-                                Long.toString(parser()),
-                                        addName.getText(),
-                                        addCount.getText(),
-                                        addBuy.getText(),
-                                        addPrice.getText()
-                        ));
+                        buffer.setId(Long.toString(parser()));
+                    } catch (ProductDAOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    buffer.setName(addName.getText());
+                    buffer.setCount(addCount.getText());
+                    buffer.setBuy_price(addBuy.getText());
+                    buffer.setRrc_price(addPrice.getText());
+                    try {
+                        productManager.addProduct(buffer);
+                        products.add(buffer);
                     } catch (ProductManagerException ex) {
                         throw new RuntimeException(ex);
                     }
-
                     addName.clear();
                 addCount.clear();
                 addBuy.clear();
                 addPrice.clear();
                 message.setText("Успешно добавлено!");
-            }
+                }
                 else {
                     message.setText("Все поля должны быть заполнены!");
                 }
@@ -165,42 +160,37 @@ public class Controller {
         });
         delButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
-                if(!tableView.getSelectionModel().isEmpty()) {
+                int select = tableView.getSelectionModel().getSelectedIndex();
+                if(select >=0) {
                     try {
-                        System.out.println(tableView.getSelectionModel().getSelectedItem().getId()+" " + tableView.getSelectionModel().getSelectedItem().getName());
                         productManager.deleteProduct(tableView.getSelectionModel().getSelectedItem().getId());
+                        tableView.getItems().remove(select);
+
                     } catch (ProductManagerException ex) {
                         throw new RuntimeException(ex);
                     }
                 }
-                tableView.getItems().remove(tableView.getSelectionModel().getSelectedIndex());
 
             }
         });
-        initData();
+
     }
 
-
     private void initData() throws ProductManagerException {
-        /*products.add(new Product("M60sql", "10", "3000.0","4600.0"));
-        products.add(new Product("кольца 16", "100", "150", "300")); */
-
         ArrayList<Product> prd1 = productManager.findProducts();
         for (Product prd: prd1
-             ) {
+        ) {
             products.add(prd);
 
         }
-        //products = FXCollections.observableArrayList(prd1);
     }
-        private Long parser() {
-        int sz = products.size();
+        private Long parser() throws ProductDAOException {
+        int sz = Integer.parseInt(productManager.lastIndex());
         Long last;
-        if(sz>0) {
-            last = (long) Integer.parseInt(products.get(sz - 1).getId()) + 1;
+        if(sz!=0) {
+            last = (long) sz + 1;
         }
-        else last = (long) 0;
+        else last = (long) 1;
         return last;
         }
-
 }

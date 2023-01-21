@@ -23,6 +23,8 @@ public class ProductDB_DAO implements ProductDAO {
             = "UPDATE product SET name=?, count=?, price=?, rrc_price=? WHERE id=?";
     private static final String DELETE
             = "DELETE FROM product WHERE id=?";
+    private static final String LAST
+            = "SELECT MAX(id) FROM product";
 
     private ConnectionBuilder builder = new SimpleConnectionBuilder();
 
@@ -33,7 +35,7 @@ public class ProductDB_DAO implements ProductDAO {
     @Override
     public String addProduct(Product product) throws ProductDAOException {
         try (Connection con = getConnection();
-             PreparedStatement pst = con.prepareStatement(INSERT, new String[]{"id"})) {
+             PreparedStatement pst = con.prepareStatement(INSERT)) {
             pst.setString(1, product.getId());
             pst.setString(2, product.getName());
             pst.setString(3, product.getCount());
@@ -70,7 +72,6 @@ public class ProductDB_DAO implements ProductDAO {
              PreparedStatement pst = con.prepareStatement(DELETE)) {
             pst.setString(1, productId);
             pst.executeUpdate();
-            System.out.println("azaza"+productId);
         } catch (Exception e) {
             throw new ProductDAOException(e);
         }
@@ -118,5 +119,18 @@ public class ProductDB_DAO implements ProductDAO {
                 rs.getString("rrc_price"));
 
         return product;
+    }
+    public String lastIndex() throws ProductDAOException {
+        String name = null;
+        try (Connection con = getConnection();
+             PreparedStatement pst = con.prepareStatement(LAST);
+             ResultSet rs = pst.executeQuery()) {
+            while(rs.next()){
+                name = rs.getString(1);
+            }
+        } catch (Exception e) {
+            throw new ProductDAOException(e);
+        }
+        return name;
     }
 }

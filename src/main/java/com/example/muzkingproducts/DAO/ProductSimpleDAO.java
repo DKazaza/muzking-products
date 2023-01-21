@@ -1,11 +1,12 @@
 package com.example.muzkingproducts.DAO;
 
 import com.example.muzkingproducts.DAO.ProductDAO;
+import com.example.muzkingproducts.Exceptions.ProductDAOException;
 import com.example.muzkingproducts.Product;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+
 
 public class ProductSimpleDAO implements ProductDAO {
 
@@ -51,11 +52,10 @@ public class ProductSimpleDAO implements ProductDAO {
     public ArrayList<Product> findProducts() {
         return products;
     }
-    /*public String generateProductId(){
-        String id = Math.round(Math.random() * 1000 + System.currentTimeMillis());
-        while(getProduct(id) != null) {
-            id = Math.round(Math.random() * 1000 + System.currentTimeMillis());
-        }
-        return id;
-    }*/
+
+    @Override
+    public String lastIndex() throws ProductDAOException {
+        return null;
+    }
+
 }

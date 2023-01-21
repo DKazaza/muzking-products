@@ -12,4 +12,5 @@ public interface ProductDAO {
     public void deleteProduct(String productId) throws ProductDAOException;
     public Product getProduct(String productId) throws ProductDAOException;
     public ArrayList<Product> findProducts() throws ProductDAOException;
+    public String lastIndex() throws ProductDAOException;
 }

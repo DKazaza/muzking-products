@@ -46,11 +46,7 @@ public class Product {
         this.rrc_price = rrc_price;
     }
 
-    public Product(String name, String count, String buy_price, String rrc_price) {
-        this.name = name;
-        this.count = count;
-        this.buy_price = buy_price;
-        this.rrc_price = rrc_price;
+    public Product() {;
     }
     public Product(String id, String name, String count, String buy_price, String rrc_price) {
         this.id = id;

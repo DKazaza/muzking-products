@@ -53,4 +53,7 @@ public class ProductManager{
             throw new ProductManagerException(ex);
         }
     }
+    public String lastIndex() throws ProductDAOException {
+        return dao.lastIndex();
+    }
 }
